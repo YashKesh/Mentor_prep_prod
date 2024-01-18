@@ -1,1 +1,0 @@
-web gunicorn studyapp.wsgi:application --log-file -

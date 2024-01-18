@@ -47,3 +47,28 @@ class Message(models.Model):
         
     def __str__(self):
         return self.body[0:50]
+    
+    
+    
+## trial of the user profile section 
+# class WorkExperience(models.Model):
+#     position = models.CharField(max_length=255)
+#     company = models.CharField(max_length=255)
+#     start_date = models.DateField()
+#     end_date = models.DateField()
+
+# class Certification(models.Model):
+#     name = models.CharField(max_length=255)
+#     validity = models.DateField()
+#     link = models.URLField()
+    
+# class UserProfile(models.Model):
+#     user = models.OneToOneField(User, on_delete=models.CASCADE)
+#     summary = models.TextField(blank=True, null=True)
+#     github = models.URLField(blank=True, null=True)
+#     linkedin = models.URLField(blank=True, null=True)
+#     work_experience = models.ManyToManyField(WorkExperience, blank=True)
+#     certifications = models.ManyToManyField(Certification, blank=True)
+#     industry = models.CharField(max_length=255, blank=True, null=True)
+#     job_role = models.CharField(max_length=255, blank=True, null=True)
+#     personal_details = models.TextField(blank=True,null=True)

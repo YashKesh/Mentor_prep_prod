@@ -1,11 +1,12 @@
+import json
 from pydoc_data.topics import topics
 from turtle import pos
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from .models import Item, Message, Room, Topic , Message 
-from .forms import RoomForm ,UserForm
+from .models import Item, Message, Room, Topic , Message, UserProfile 
+from .forms import CustomUserCreationForm, RoomForm ,UserForm, UserProfileForm
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login , logout
@@ -26,14 +27,20 @@ def loginPage(request):
     if request.method == 'POST':
         usern = request.POST.get('username')
         password = request.POST.get('password')
+        login_type = request.POST.get('login_type')
+        print(login_type)
         try:
             user = User.objects.get(username=usern)
         except:
             messages.error(request,'User does not exist') 
         user =  authenticate(request, username= usern,password=password)
         if user is not None:
-            login(request,user)
-            return redirect('home')
+            if(login_type=='student'):
+                login(request,user)
+                return redirect('home')
+            elif(login_type=='mentor'):
+                login(request,user)
+                return redirect('home_mentor')
         else:
             messages.error(request,'Username or Password does not exist')
     context ={'page':page}
@@ -46,18 +53,22 @@ def logoutUser(request):
 
 def registerPage(request):
     # page = 'register'
-    form = UserCreationForm()
+    form = CustomUserCreationForm()
     if request.method == 'POST':
-        form= UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
             user.save()
-            login(request,user)
+            login(request, user)
             return redirect('home')
         else:
-            messages.error(request,'An error occured during registration')
-    return render(request,'base/login_register.html',{'form':form})
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+
+
+    return render(request, 'base/login_register.html', {'form': form})
 
 def home(request):
     q = request.GET.get('q') if request.GET.get('q')!=None else ''
@@ -72,6 +83,19 @@ def home(request):
     room_messages = Message.objects.filter(Q(room__topic__name__icontains=q))
     context = {'rooms': rooms, 'topics': topics,'room_count': room_count , 'room_messages':room_messages}
     return render(request,'base/home.html',context)
+
+def home_mentor(request):
+    q = request.GET.get('q') if request.GET.get('q')!=None else ''
+    rooms = Room.objects.filter(
+        Q(topic__name__icontains=q) |
+        Q(name__icontains=q) |
+        Q(description__icontains=q)
+        )
+    topics = Topic.objects.all()[0:5]
+    room_count = rooms.count()
+    room_messages = Message.objects.filter(Q(room__topic__name__icontains=q))
+    context = {'rooms': rooms, 'topics': topics,'room_count': room_count , 'room_messages':room_messages}
+    return render(request,'base/home_mentor.html',context)
 
 def room(request,pk):
     room = Room.objects.get(id = pk)
@@ -88,6 +112,21 @@ def room(request,pk):
     context = {'room':room,'room_messages':room_messages,'participants':participants}
     return render(request, 'base/room.html',context)
 
+def room2(request,pk):
+    room = Room.objects.get(id = pk)
+    room_messages = room.message_set.all()
+    participants = room.participants.all()
+    if request.method == 'POST': 
+       message = Message.objects.create(
+           user = request.user,
+           room = room,
+           body = request.POST.get('body') 
+       )
+       room.participants.add(request.user)
+       return redirect('room', pk=room.id)
+    context = {'room':room,'room_messages':room_messages,'participants':participants}
+    return render(request, 'base/room2.html',context)
+
 def userProfile(request,pk):
     user = User.objects.get(id=pk)
     rooms = user.room_set.all()
@@ -95,6 +134,14 @@ def userProfile(request,pk):
     topics = Topic.objects.all()
     context={'user':user,'rooms':rooms,'room_messages':room_messages,'topics':topics}
     return render(request,'base/profile.html',context)
+
+def mentorProfile(request,pk):
+    user = User.objects.get(id=pk)
+    rooms = user.room_set.all()
+    room_messages = user.message_set.all()
+    topics = Topic.objects.all()
+    context={'user':user,'rooms':rooms,'room_messages':room_messages,'topics':topics}
+    return render(request,'base/mentor_profile.html',context)
 
 @login_required(login_url='login')
 def createRoom(request):
@@ -110,7 +157,7 @@ def createRoom(request):
             description = request.POST.get('description')
         )
     
-        return redirect('home')
+        return redirect('home_mentor')
     context = { 'form' : form ,'topics':topics}
     return render(request, 'base/room_form.html' ,context)
 
@@ -130,7 +177,7 @@ def updateRoom(request,pk):
 
         room.description = request.POST.get('description')
         room.save()
-        return redirect('home')
+        return redirect('home_mentor')
     context = {'form':form,'topics':topics,'room':room}
     return render(request , 'base/room_form.html', context)
 
@@ -141,7 +188,7 @@ def deleteRoom(request,pk):
         return HttpResponse('You are not allowed here') 
     if request.method == 'POST':
         room.delete()
-        return redirect('home')
+        return redirect('home_mentor')
     return render(request,'base/delete.html',{'obj':room})
 
 @login_required(login_url='login')
@@ -165,6 +212,26 @@ def updateUser(request):
             form.save()
             return redirect('user-proifle', pk=user.id)
     return render(request, 'base/update-user.html', {'form':form})
+
+@login_required(login_url='login')
+def updateMentor(request):
+    user = request.user
+    user_profile, created = UserProfile.objects.get_or_create(user=user)
+    
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = UserProfileForm(request.POST, instance=user_profile)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            
+            return redirect('user-profile', pk=user.id)
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = UserProfileForm(instance=user_profile)
+
+    return render(request, 'base/update-mentor.html', {'user_form': user_form, 'profile_form': profile_form})
 
 def topicsPage(request):
     q = request.GET.get('q') if request.GET.get('q')!=None else ''
@@ -205,6 +272,54 @@ def subscription(request):
         'order_id':payment_order_id
     }
     return render(request,'base/contact.html',context)
+from django.db.models import Count
+from django.db.models import F
+def analysisDashboard(request,pk):
+    host_user = User.objects.get(username=pk)
+    # Get all rooms with the specified host
+    rooms = Room.objects.filter(host=host_user)
+    total_participants_count = 0
+    for room in rooms:
+        total_participants_count += room.participants.count()
+    total_rooms_count = rooms.count()
+    average_participants_per_room = (total_participants_count // total_rooms_count) if total_rooms_count > 0 else 0
+    room_with_max_participants = max(rooms, key=lambda room: room.participants.count(), default=None)
+    room_with_max_participants_name = room_with_max_participants.name if room_with_max_participants else None
+    topic_of_max_participants = room_with_max_participants.topic.name if room_with_max_participants else None
+    unique_topics = rooms.values('topic__name').distinct()
+    unique_topics_data = list(rooms.values('topic__name').annotate(total_participants=Count('participants')))
+    unique_topics_data_json = json.dumps(unique_topics_data)
+    topic_names = [entry['topic__name'] for entry in unique_topics_data]
+    total_participants_topic = [entry['total_participants'] for entry in unique_topics_data]
+    longest_running_room = Room.objects.filter(host=host_user).annotate(active_duration=F('updated') - F('created')).order_by('-active_duration').first()
+    # print(unique_topics_data)
+    context = {
+        'host_username': pk,
+        'rooms': rooms,
+        'total_participants_count': total_participants_count,
+        'total_rooms_count': total_rooms_count,
+        'room_with_max_participants_name': room_with_max_participants_name,
+        'topic_of_max_participants': topic_of_max_participants,
+        'unique_topics':unique_topics,
+        'unique_topics_data': unique_topics_data,
+        'unique_topics_data_json': unique_topics_data_json,
+        'topic_names':topic_names,
+        'total_participants_topic':total_participants_topic,
+        'average_participants_per_room':average_participants_per_room,
+        'longest_running_room':longest_running_room,
+        
+    }
 
+    return render(request, 'base/analysis_dashboard.html', context)
 
-    
+## profile building 
+@login_required(login_url='login')
+def profile(request):
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+    form = UserProfileForm(request.POST or None, instance=user_profile)
+
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        return redirect('profile')  # Redirect to the profile page
+
+    return render(request, 'profile.html', {'form': form})

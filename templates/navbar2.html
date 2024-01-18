@@ -1,9 +1,9 @@
 {% load static %}
 <header class="header header--loggedIn">
     <div class="container">
-
-      <a href="{% url 'home' %}" class="header__logo">
-        <img src="{% static 'images/logo.svg=' %}" />
+      
+      <a href="{% url 'home_mentor' %}" class="header__logo">
+        <img src="{% static 'images/logo.svg' %}" />
         <h1>MentorPrep</h1>
       </a>
       <form class="header__search" method="GET" action="{% url 'home' %}">
@@ -107,7 +107,7 @@
             </svg>
             Logout</a
           >
-          <a href="{% url 'user-profile' request.user.id %}" class="dropdown-link"
+          <a href="{% url 'mentor-profile' request.user.id %}" class="dropdown-link"
             ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="16" cy="16" r="14" />
               <path d="M22 23C20.08 21.28 16.67 20 16 20C15.33 20 11.92 21.28 10 23" />

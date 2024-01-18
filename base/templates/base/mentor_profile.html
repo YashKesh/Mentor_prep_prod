@@ -1,4 +1,4 @@
-{% extends 'main.html' %}
+{% extends 'main2.html' %}
 {% block content %}
 {% load static %}
   <main class="profile-page layout layout--3">
@@ -19,10 +19,17 @@
             <h3>{{user.username}}</h3>
             <p>@{{user.username}}</p>
             {% if request.user == user %}
-            <a href="{% url 'update-user' %}" class="btn btn--main btn--pill">Edit Profile</a>
+            <a href="{% url 'update-mentor' %}" class="btn btn--main btn--pill">Edit Profile</a>
             {% endif %}
           </div>
           <div class="profile__about">
+            <a class="btn btn--main" href="{% url 'analysis-dashboard' request.user.username  %}" style="margin-bottom: 2%;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                    <title>graph</title>
+                    <path d="M2 17h6v12h4V8h6V24h4V14h6V30" fill="none" stroke="currentColor" stroke-width="2" />
+                  </svg>
+                Analysis Dashboard
+              </a>
             <h3>About</h3>
             <p>
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur illo tenetur
@@ -38,7 +45,7 @@
             </h2>
           </div>
         </div>
-        {% include 'base/feed_component.html'  %}
+        {% include 'base/feed_component_mentor.html'  %}
        
       </div>
       <!-- Room List End -->
