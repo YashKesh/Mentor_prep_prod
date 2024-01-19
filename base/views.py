@@ -1,12 +1,12 @@
 import json
 from pydoc_data.topics import topics
 from turtle import pos
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from .models import Item, Message, Room, Topic , Message, UserProfile 
-from .forms import CustomUserCreationForm, RoomForm ,UserForm, UserProfileForm
+from .models import Item, Message, Room, Topic , Message, UserProfile
+from .forms import CompleteProfileForm, CustomUserCreationForm, RoomForm ,UserForm
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login , logout
@@ -129,19 +129,53 @@ def room2(request,pk):
 
 def userProfile(request,pk):
     user = User.objects.get(id=pk)
+    try:
+        user_profile = UserProfile.objects.get(user=user)
+
+        # Filter non-null fields from the UserProfile model
+        non_null_fields = {
+            'summary': user_profile.summary,
+            'github': user_profile.github,
+            'linkedin': user_profile.linkedin,
+            'industry': user_profile.industry,
+            'job_role': user_profile.job_role,
+            'personal_details': user_profile.personal_details,
+        }
+
+    except UserProfile.DoesNotExist:
+        # If UserProfile does not exist, set non_null_fields to an empty dictionary
+        non_null_fields = {}
     rooms = user.room_set.all()
     room_messages = user.message_set.all()
     topics = Topic.objects.all()
-    context={'user':user,'rooms':rooms,'room_messages':room_messages,'topics':topics}
+    context={'user':user,'rooms':rooms,'room_messages':room_messages,'topics':topics, 'profile_data': non_null_fields}
     return render(request,'base/profile.html',context)
 
-def mentorProfile(request,pk):
-    user = User.objects.get(id=pk)
+def mentorProfile(request, pk):
+    user = get_object_or_404(User, id=pk)
+
+    try:
+        user_profile = UserProfile.objects.get(user=user)
+
+        # Filter non-null fields from the UserProfile model
+        non_null_fields = {
+            'summary': user_profile.summary,
+            'github': user_profile.github,
+            'linkedin': user_profile.linkedin,
+            'industry': user_profile.industry,
+            'job_role': user_profile.job_role,
+            'personal_details': user_profile.personal_details,
+        }
+
+    except UserProfile.DoesNotExist:
+        # If UserProfile does not exist, set non_null_fields to an empty dictionary
+        non_null_fields = {}
+
     rooms = user.room_set.all()
     room_messages = user.message_set.all()
     topics = Topic.objects.all()
-    context={'user':user,'rooms':rooms,'room_messages':room_messages,'topics':topics}
-    return render(request,'base/mentor_profile.html',context)
+    context = {'user': user, 'rooms': rooms, 'room_messages': room_messages, 'topics': topics, 'profile_data': non_null_fields}
+    return render(request, 'base/mentor_profile.html', context)
 
 @login_required(login_url='login')
 def createRoom(request):
@@ -205,22 +239,11 @@ def deleteMessage(request,pk):
 @login_required(login_url='login')
 def updateUser(request):
     user = request.user
-    form = UserForm(instance=user)
-    if request.method == 'POST':
-        form = UserForm(request.POST ,instance=user)
-        if form.is_valid():
-            form.save()
-            return redirect('user-proifle', pk=user.id)
-    return render(request, 'base/update-user.html', {'form':form})
-
-@login_required(login_url='login')
-def updateMentor(request):
-    user = request.user
     user_profile, created = UserProfile.objects.get_or_create(user=user)
     
     if request.method == 'POST':
         user_form = UserForm(request.POST, instance=user)
-        profile_form = UserProfileForm(request.POST, instance=user_profile)
+        profile_form = CompleteProfileForm(request.POST, instance=user_profile)
         
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
@@ -229,7 +252,27 @@ def updateMentor(request):
             return redirect('user-profile', pk=user.id)
     else:
         user_form = UserForm(instance=user)
-        profile_form = UserProfileForm(instance=user_profile)
+        profile_form = CompleteProfileForm(instance=user_profile)
+
+    return render(request, 'base/update-user.html', {'user_form': user_form, 'profile_form': profile_form})
+
+@login_required(login_url='login')
+def updateMentor(request):
+    user = request.user
+    user_profile, created = UserProfile.objects.get_or_create(user=user)
+    
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = CompleteProfileForm(request.POST, instance=user_profile)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            
+            return redirect('mentor-profile', pk=user.id)
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = CompleteProfileForm(instance=user_profile)
 
     return render(request, 'base/update-mentor.html', {'user_form': user_form, 'profile_form': profile_form})
 
@@ -316,10 +359,43 @@ def analysisDashboard(request,pk):
 @login_required(login_url='login')
 def profile(request):
     user_profile, created = UserProfile.objects.get_or_create(user=request.user)
-    form = UserProfileForm(request.POST or None, instance=user_profile)
+    form = CompleteProfileForm(request.POST or None, instance=user_profile)
 
     if request.method == 'POST' and form.is_valid():
         form.save()
         return redirect('profile')  # Redirect to the profile page
 
     return render(request, 'profile.html', {'form': form})
+
+def user_interests(request, user_id):
+    user_profile = UserProfile.objects.get(user_id=user_id)
+    interests = user_profile.get_interests()
+    related_rooms = Room.objects.filter(topic__name__in=interests)
+    return render(request, 'base/user_interests.html', {'user_profile': user_profile, 'interests': interests,'rooms':related_rooms})
+
+
+from django.shortcuts import render
+from .forms import VideoForm
+from .models import Video
+
+def upload_video(request):
+    if request.method == 'POST':
+        form = VideoForm(request.POST, request.FILES)
+        if form.is_valid():
+            video = form.save(commit=False)
+            video.uploaded_by = request.user
+            video.save()
+            return redirect('video_list')  # Redirect to the video list page
+    else:
+        form = VideoForm()
+    return render(request, 'base/upload-video.html', {'form': form})
+
+def video_list(request):
+    videos = Video.objects.all()
+    return render(request, 'base/video_list.html', {'videos': videos})
+
+
+
+def video_list_student(request):
+    videos = Video.objects.all()
+    return render(request, 'base/video_list_student.html', {'videos': videos})
