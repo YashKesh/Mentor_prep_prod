@@ -372,3 +372,30 @@ def user_interests(request, user_id):
     interests = user_profile.get_interests()
     related_rooms = Room.objects.filter(topic__name__in=interests)
     return render(request, 'base/user_interests.html', {'user_profile': user_profile, 'interests': interests,'rooms':related_rooms})
+
+
+from django.shortcuts import render
+from .forms import VideoForm
+from .models import Video
+
+def upload_video(request):
+    if request.method == 'POST':
+        form = VideoForm(request.POST, request.FILES)
+        if form.is_valid():
+            video = form.save(commit=False)
+            video.uploaded_by = request.user
+            video.save()
+            return redirect('video_list')  # Redirect to the video list page
+    else:
+        form = VideoForm()
+    return render(request, 'base/upload-video.html', {'form': form})
+
+def video_list(request):
+    videos = Video.objects.all()
+    return render(request, 'base/video_list.html', {'videos': videos})
+
+
+
+def video_list_student(request):
+    videos = Video.objects.all()
+    return render(request, 'base/video_list_student.html', {'videos': videos})

@@ -62,3 +62,20 @@ class UserProfile(models.Model):
     def get_interests(self):
         # Extract topics from personal_details and return them as a list
         return [topic.strip() for topic in self.personal_details.split(',')] if self.personal_details else []
+
+
+from django.db import models
+from django.contrib.auth.models import User
+
+class Video(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    video_file = models.FileField(upload_to='videos/')
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    upload_date = models.DateTimeField(auto_now_add=True)
+
+    def _str_(self):
+        return self.title
+    @property
+    def get_video_url(self):
+        return self.video_file.url
