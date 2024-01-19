@@ -23,7 +23,8 @@ urlpatterns = [
       path('activity/' , views.activityPage , name="activity"),
        path('courses/' , views.video , name="courses"),
         path('subscription/' , views.subscription , name="subscription"),
-    path('dashboard/<str:pk>/',views.analysisDashboard,name='analysis-dashboard')        
+    path('dashboard/<str:pk>/',views.analysisDashboard,name='analysis-dashboard') ,
+    path('user_interests/<int:user_id>/', views.user_interests, name='user_interests'),       
         
 
 ]

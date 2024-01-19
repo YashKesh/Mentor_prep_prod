@@ -1,6 +1,16 @@
 {% extends 'main2.html' %}
 {% block content %}
 {% load static %}
+<style>
+  .links{
+    margin-bottom: 2%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .expertise{
+    margin-top: 5%;
+  }
+</style>
   <main class="profile-page layout layout--3">
     <div class="container">
       <!-- Topics Start -->
@@ -32,13 +42,24 @@
               </a>
             <h3>About</h3>
             <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequuntur illo tenetur
-              facilis sunt nemo debitis quisquam hic atque aut? Ducimus alias placeat optio
-              accusamus repudiandae quis ab ex exercitationem rem?
+              {{profile_data.summary}}
             </p>
           </div>
         </div>
-
+        <div class="links">
+          <div class="github">
+            <h3>Github Link</h3>
+            <p><a href={{profile_data.github}}>{{profile_data.github}}</a></p>
+          </div>
+          <div class="linkdin">
+            <h3>Linkdin Link</h3>
+            <p><a href={{profile_data.linkedin}}>{{profile_data.linkedin}}</a></p>
+          </div>
+          <div class="expertise">
+            <h3>Expertise</h3>
+            <p>{{profile_data.personal_details}}</p>
+          </div>
+        </div>
         <div class="roomList__header">
           <div>
             <h2>Study Rooms Hosted by {{user.username}}</a>

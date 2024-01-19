@@ -2,8 +2,8 @@ from dataclasses import field, fields
 from importlib.abc import ExecutionLoader
 from pyexpat import model
 from django import forms
-from django.forms import ModelForm
-from .models import Room, UserProfile
+from django.forms import ModelForm, inlineformset_factory
+from .models import  Room, UserProfile
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -39,7 +39,8 @@ class CustomUserCreationForm(UserCreationForm):
             raise forms.ValidationError("Invalid role")
         return role
       
-class UserProfileForm(forms.ModelForm):
+
+class CompleteProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        exclude = ['user']
+        fields = ['summary', 'github', 'linkedin', 'industry', 'job_role', 'personal_details']

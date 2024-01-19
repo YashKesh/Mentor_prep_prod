@@ -51,24 +51,14 @@ class Message(models.Model):
     
     
 ## trial of the user profile section 
-# class WorkExperience(models.Model):
-#     position = models.CharField(max_length=255)
-#     company = models.CharField(max_length=255)
-#     start_date = models.DateField()
-#     end_date = models.DateField()
-
-# class Certification(models.Model):
-#     name = models.CharField(max_length=255)
-#     validity = models.DateField()
-#     link = models.URLField()
-    
-# class UserProfile(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     summary = models.TextField(blank=True, null=True)
-#     github = models.URLField(blank=True, null=True)
-#     linkedin = models.URLField(blank=True, null=True)
-#     work_experience = models.ManyToManyField(WorkExperience, blank=True)
-#     certifications = models.ManyToManyField(Certification, blank=True)
-#     industry = models.CharField(max_length=255, blank=True, null=True)
-#     job_role = models.CharField(max_length=255, blank=True, null=True)
-#     personal_details = models.TextField(blank=True,null=True)
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    summary = models.TextField(blank=True, null=True)
+    github = models.URLField(blank=True, null=True)
+    linkedin = models.URLField(blank=True, null=True)
+    industry = models.CharField(max_length=255, blank=True, null=True)
+    job_role = models.CharField(max_length=255, blank=True, null=True)
+    personal_details = models.TextField(blank=True,null=True)
+    def get_interests(self):
+        # Extract topics from personal_details and return them as a list
+        return [topic.strip() for topic in self.personal_details.split(',')] if self.personal_details else []
