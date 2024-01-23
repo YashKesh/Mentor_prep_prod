@@ -79,3 +79,13 @@ class Video(models.Model):
     @property
     def get_video_url(self):
         return self.video_file.url
+    
+
+class Document(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='documents/')
+    description = models.TextField(null=True, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Document - {self.file.name}"
