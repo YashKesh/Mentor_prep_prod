@@ -33,7 +33,8 @@ urlpatterns = [
     path('upload_document/', views.upload_document, name='upload_document'),
     path('document_list/', views.document_list, name='document_list'),
     path('user_rooms_timeline/', views.user_rooms_timeline_graph, name='user_rooms_timeline_graph'),
-    
+     path('public_documents/', views.document_list_public, name='public_documents'),
+      path('edit-document/<int:document_id>/', views.edit_document, name='edit_document'),
         
 
 ]

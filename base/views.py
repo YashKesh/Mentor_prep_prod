@@ -4,7 +4,7 @@ from pydoc_data.topics import topics
 from turtle import pos
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from .models import Document, Item, Message, Room, Topic , Message, UserProfile
@@ -421,7 +421,10 @@ def upload_document(request):
 @login_required
 def document_list(request):
     documents = Document.objects.filter(user=request.user).order_by('-uploaded_at')
-    return render(request, 'base/document_list.html', {'documents': documents})
+    public_documents = documents.filter(is_public=True)
+    private_documents = documents.filter(is_public=False)
+    return render(request, 'base/document_list.html', {'documents': documents,'public_documents': public_documents,
+        'private_documents': private_documents,})
 
 
 
@@ -475,3 +478,29 @@ def user_rooms_timeline_graph(request):
     plt.close()
 
     return render(request, 'base/timeline_graph.html', {'graph_file': static(graph_file_path)})
+
+
+def document_list_public(request):
+    # Retrieve all public documents
+    public_documents = Document.objects.filter(is_public=True)
+
+    context = {
+        'public_documents': public_documents,
+    }
+
+    return render(request, 'base/public_documents.html', context)
+
+from django.core.files.base import ContentFile
+@login_required
+def edit_document(request, document_id):
+    document = get_object_or_404(Document, id=document_id, user=request.user)
+
+    if not document.is_public and document.user != request.user:
+        return HttpResponseForbidden("You do not have permission to edit this document.")
+
+    if request.method == 'POST':
+        # Process the form data here if needed
+        # For simplicity, you can just save the content to the document
+        document.file.save(document.file.name, ContentFile(request.POST['content']))
+
+    return render(request, 'base/edit_document.html', {'document': document})

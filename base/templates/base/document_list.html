@@ -3,7 +3,7 @@
 
 {% block content %}
 <style>
-    .maincontainer{
+    .maincontainer {
         width: 50%;
         margin-left: auto;
         margin-right: auto;
@@ -23,44 +23,82 @@
         </a>
         <h3>Back To Profile</h3>
     </div>
-  <h2 style="margin-bottom: 2%;">Document List</h2>
-  
-  {% if documents %}
-    {% for document in documents %}
-      <div class="roomListRoom">
+    
+    <a href="{% url 'upload_document' %}">Upload Document</a>
+    <h2 style="margin-bottom: 2%;">Document List</h2>
+
+    <h3>Public Documents:</h3>
+    {% for document in public_documents %}
+    <div class="roomListRoom">
         <div class="roomListRoom__header">
-          <a href="{% url 'user-profile' document.user.id %}" class="roomListRoom__author">
-            <div class="avatar avatar--small">
-              <img src="{% static 'images\avatar.svg' %}" />
+            <a href="{% url 'user-profile' document.user.id %}" class="roomListRoom__author">
+                <div class="avatar avatar--small">
+                    <img src="{% static 'images\avatar.svg' %}" />
+                </div>
+                <span>@{{ document.user.username }}</span>
+            </a>
+            <div class="roomListRoom__actions">
+                <span>{{ document.uploaded_at|timesince }}</span>
             </div>
-            <span>@{{ document.user.username }}</span>
-          </a>
-          <div class="roomListRoom__actions">
-            <span>{{ document.uploaded_at|timesince }}</span>
-          </div>
         </div>
         <div class="roomListRoom__content">
-          <a href="{{ document.file.url }}" target="_blank" download="{{ document.file.name }}">
-            {{ document.file.name }}
-          </a>
-          <p>{{ document.description }}</p>
+            <a href="{{ document.file.url }}" target="_blank" download="{{ document.file.name }}">
+                {{ document.file.name }}
+            </a>
+            <p>{{ document.description }}</p>
         </div>
         <div class="roomListRoom__meta">
-          <a href="{{ document.file.url }}" class="roomListRoom__joined">
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-              <title>file</title>
-              <!-- Add the appropriate path for the file icon here -->
-            </svg>
-            Download
-          </a>
-          <small>Uploaded at: {{ document.uploaded_at }}</small>
+            <a href="{{ document.file.url }}" class="roomListRoom__joined">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                    <title>file</title>
+                    <!-- Add the appropriate path for the file icon here -->
+                </svg>
+                Download
+            </a>
+            <small>Uploaded at: {{ document.uploaded_at }}</small>
+            <!-- {% if document.is_public and document.user == request.user %}
+                <a href="{% url 'edit_document' document.id %}">Edit</a>
+            {% endif %} -->
         </div>
-      </div>
+    </div>
     {% endfor %}
-  {% else %}
-    <p>No documents available.</p>
-  {% endif %}
 
-  <a href="{% url 'upload_document' %}">Upload Document</a>
+    <h3>Private Documents:</h3>
+    {% for document in private_documents %}
+    <div class="roomListRoom">
+        <div class="roomListRoom__header">
+            <a href="{% url 'user-profile' document.user.id %}" class="roomListRoom__author">
+                <div class="avatar avatar--small">
+                    <img src="{% static 'images\avatar.svg' %}" />
+                </div>
+                <span>@{{ document.user.username }}</span>
+            </a>
+            <div class="roomListRoom__actions">
+                <span>{{ document.uploaded_at|timesince }}</span>
+            </div>
+        </div>
+        <div class="roomListRoom__content">
+            <a href="{{ document.file.url }}" target="_blank" download="{{ document.file.name }}">
+                {{ document.file.name }}
+            </a>
+            <p>{{ document.description }}</p>
+        </div>
+        <div class="roomListRoom__meta">
+            <a href="{{ document.file.url }}" class="roomListRoom__joined">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                    <title>file</title>
+                    <!-- Add the appropriate path for the file icon here -->
+                </svg>
+                Download
+            </a>
+            <small>Uploaded at: {{ document.uploaded_at }}</small>
+        </div>
+    </div>
+    {% endfor %}
+
+    {% if not public_documents and not private_documents %}
+    <p>No documents available.</p>
+    {% endif %}
+
 </div>
 {% endblock %}

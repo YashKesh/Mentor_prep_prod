@@ -58,6 +58,8 @@ class VideoForm(forms.ModelForm):
         
 ##document form 
 class DocumentForm(forms.ModelForm):
+    is_public = forms.BooleanField(initial=False, required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
     class Meta:
         model = Document
-        fields = ['file', 'description']
+        fields = ['file', 'description', 'is_public']

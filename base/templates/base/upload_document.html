@@ -21,10 +21,13 @@
                 <form method="post" enctype="multipart/form-data" class="form" action="{% url 'upload_document' %}">
                     {% csrf_token %}
                     {% for field in form %}
-                        <div class="form__group">
+                    <div class="form__group">
+                        {% if field.name == 'is_public' %}
+                            <label for="{{ field.id_for_label }}">Make Public</label>
+                        {% else %}
                             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                        </div>
+                        {% endif %}
+                        {{ field }}
                     {% endfor %}
                     <div class="form__action">
                         <a class="btn btn--dark" href="{% url 'document_list' %}">Cancel</a>

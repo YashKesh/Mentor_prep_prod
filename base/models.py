@@ -86,6 +86,9 @@ class Document(models.Model):
     file = models.FileField(upload_to='documents/')
     description = models.TextField(null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_public = models.BooleanField(default=False)  # New field for public/private
 
     def __str__(self):
-        return f"{self.user.username}'s Document - {self.file.name}"
+        visibility = "Public" if self.is_public else "Private"
+        return f"{self.user.username}'s {visibility} Document - {self.file.name}"
+    
