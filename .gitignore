@@ -1,4 +1,5 @@
-/videos
-/db.sqlite3
-/runtime.txt
-/media
+/videos/
+/db.sqlite3/
+runtime.txt
+/media/
+
