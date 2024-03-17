@@ -79,3 +79,16 @@ class Video(models.Model):
     @property
     def get_video_url(self):
         return self.video_file.url
+    
+
+class Document(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='documents/')
+    description = models.TextField(null=True, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    is_public = models.BooleanField(default=False)  # New field for public/private
+
+    def __str__(self):
+        visibility = "Public" if self.is_public else "Private"
+        return f"{self.user.username}'s {visibility} Document - {self.file.name}"
+    

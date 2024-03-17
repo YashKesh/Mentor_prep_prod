@@ -33,7 +33,7 @@
             {% endif %}
           </div>
           <div class="profile__about">
-            <div class="section_profile" style="display: grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+            <div class="section_profile" style="display: grid;grid-template-columns:1fr 1fr;gap:1rem">
             <a class="btn btn--main" href="{% url 'analysis-dashboard' request.user.username  %}" style="margin-bottom: 2%;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
                     <title>graph</title>
@@ -57,6 +57,20 @@
               
               
                 Video List
+              </a>
+              <a class="btn btn--main" href="{% url 'user_rooms_timeline_graph'  %}" style="margin-bottom: 2%;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="200" height="20">
+                  <!-- Background bar in grey -->
+                  <rect width="100%" height="100%" fill="#CCCCCC" />
+              
+                  <!-- Progress bar (50% completion for illustration) -->
+                  <rect width="50%" height="100%" fill="#51546e" />
+              </svg>
+              
+              
+              
+              
+                Student Progress
               </a>
             </div>
             <h3>About</h3>

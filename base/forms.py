@@ -3,7 +3,7 @@ from importlib.abc import ExecutionLoader
 from pyexpat import model
 from django import forms
 from django.forms import ModelForm, inlineformset_factory
-from .models import  Room, UserProfile
+from .models import  Document, Room, UserProfile
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -53,3 +53,13 @@ class VideoForm(forms.ModelForm):
     class Meta:
         model = Video
         fields = ['title', 'description', 'video_file']
+        
+        
+        
+##document form 
+class DocumentForm(forms.ModelForm):
+    is_public = forms.BooleanField(initial=False, required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
+    class Meta:
+        model = Document
+        fields = ['file', 'description', 'is_public']
