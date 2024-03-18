@@ -1,7 +1,6 @@
 import json
 import os
 from pydoc_data.topics import topics
-from turtle import pos
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpResponseForbidden
