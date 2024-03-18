@@ -23,10 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-33y!5vw5#dlr=c7n)+nvirk7(#twzfw6v0h+*m8+ea(zvvgybq'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -97,8 +97,9 @@ WSGI_APPLICATION = 'studyapp.wsgi.application'
 #         'PORT' : '47622'
 #     }
 # }
+database_url = os.environ.get('DATABASE_URL')
 DATABASES = {
-    "default" : dj_database_url.parse("postgres://studybuddy_h9w5_user:f5OFS0PMGxl9QnnW9HedqLgXxgdd7Mox@dpg-cnri70sf7o1s73co0v1g-a.oregon-postgres.render.com/studybuddy_h9w5")
+    "default" : dj_database_url.parse(database_url)
 }
 
 # Password validation
