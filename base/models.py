@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from embed_video.fields import EmbedVideoField
 
 class Item(models.Model):
-    videotitle = models.CharField(max_length=800,default=NULL)
+    videotitle = models.CharField(max_length=800,default=None)
     video = EmbedVideoField()  # same like models.URLField()
 
 class Topic(models.Model):
