@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from contextlib import nullcontext
 from email.policy import default
 from operator import mod
