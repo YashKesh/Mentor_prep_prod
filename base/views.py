@@ -369,8 +369,10 @@ def profile(request):
     return render(request, 'profile.html', {'form': form})
 
 def user_interests(request, user_id):
-    user_profile = UserProfile.objects.get(user_id=user_id)
-    interests = user_profile.get_interests()
+    user_profile = UserProfile.objects.filter(user_id=user_id)
+    if not user_profile:
+        return render(request, 'base/user_interests.html')
+    interests = user_profile.first().get_interests()
     related_rooms = Room.objects.filter(topic__name__in=interests)
     return render(request, 'base/user_interests.html', {'user_profile': user_profile, 'interests': interests,'rooms':related_rooms})
 
