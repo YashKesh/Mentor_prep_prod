@@ -22,6 +22,7 @@ urlpatterns = [
     path('update-user/' , views.updateUser , name="update-user"),
      path('update-mentor/' , views.updateMentor , name="update-mentor"),
      path('topics/' , views.topicsPage , name="topics"),
+     path('topics_mentor/' , views.topicsPageMentor , name="topics_mentor"),
       path('activity/' , views.activityPage , name="activity"),
        path('courses/' , views.video , name="courses"),
         path('subscription/' , views.subscription , name="subscription"),
